@@ -1,0 +1,43 @@
+# 5-node dropout recovery: kill exactly one MPC node after "Epoch 1 Batch 2".
+# Expect: Resumed after dropout recovery, recovery_dropout success=1.
+#
+#   docker compose run --rm ml-benchmark --config /workspace/benchmark-configs/with-client-fault-5node.yaml
+
+headless: true
+host: "127.0.0.1"
+n-nodes: 5
+t: 1
+base-port: 9320
+batch-size: 64
+accum-steps: 1
+num-epochs: 5
+mnist-samples: 512
+learning-rate: 0.002
+seed: 2026
+loss-mode: softmax
+scale-factor: 65536
+field-size: 2305843009213693951
+softmax-temperature: 2.0
+grad-clip: 0.5
+logit-clip: 4.0
+exp-approx: pade22
+softmax-grad-mode: secure_approx
+explode-logit-threshold: 100.0
+loss-growth-threshold: 5.0
+grad-norm-threshold: 1500.0
+no-abort-on-instability: true
+debug-numerics: false
+membership-epoch: 0
+receive-dataset-shares-from-client: true
+dataset-source-node-id: 0
+dataset-distribution-timeout: 600.0
+start-client-distributor: true
+client-eval-after-training: true
+client-eval-batched-receive: true
+client-eval-samples: 64
+client-test-samples: 64
+enable-failure-detection: true
+# Batch MPC steps often exceed 6s; use 20s timeout to avoid false "failed node" during training.
+heartbeat-interval: 2.0
+failure-timeout: 20.0
+enable-dropout-reshare-recovery: true

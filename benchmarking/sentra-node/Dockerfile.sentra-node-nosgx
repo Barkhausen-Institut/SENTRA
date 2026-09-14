@@ -1,0 +1,57 @@
+# Legacy Sentra node (Rust `sentra_node` + wait-for-it), no Occlum package.
+# Build from repository root:
+#   docker build -f benchmarking/sentra-node/Dockerfile.sentra-node-nosgx -t <tag> .
+#---------------------------------------------------------------------
+ARG BASE_IMAGE=ubuntu:22.04
+FROM $BASE_IMAGE AS sentra-builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Berlin
+ENV IS_DOCKERFILE=1
+
+WORKDIR /
+
+RUN apt-get update
+
+RUN apt install -y wget cargo protobuf-compiler wait-for-it
+
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+RUN bash ./Miniconda3-latest-Linux-x86_64.sh -b -p /miniconda
+RUN /miniconda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+RUN /miniconda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+RUN /miniconda/bin/conda create --prefix /python-occlum -y  python=3.10.0 numpy==1.26.4 pyyaml==6.0.3 tensorflow==2.11.0
+
+RUN mkdir /bin/sentra
+RUN mkdir /bin/sentra/ml_training
+COPY ./sentra-node/python/node/ml_training /bin/sentra/ml_training/
+COPY ./sentra-node/python/node/run_mnist_batched_secure.py /bin/sentra/
+COPY ./sentra-node/python/node/communication_test/InterNodeCommunicationTest.py /bin/sentra/
+
+COPY ./benchmarking/sentra-node/training_config.yaml /etc/training_config.yaml
+RUN chmod 644 /etc/training_config.yaml
+
+RUN mkdir -p /sentra-node/rust/src
+COPY ./sentra-node/rust/Cargo.toml /sentra-node/rust
+COPY ./sentra-node/rust/rust-toolchain.toml /sentra-node/rust
+COPY ./sentra-node/rust/build.rs /sentra-node/rust
+COPY ./sentra-node/rust/SentraInterNode-GRPC-Services.proto /sentra-node/rust/
+COPY ./sentra-node/rust/SentraBackend-GRPC-Services.proto /sentra-node/rust/
+
+WORKDIR /sentra-node/rust
+RUN echo 'fn main() {}' > ./src/main.rs
+RUN cargo update -p getrandom@0.4.2 --precise 0.3.4
+RUN cargo build --release
+
+COPY ./sentra-node/rust/src /sentra-node/rust/src
+RUN rm SentraBackend-GRPC-Services.proto
+COPY ./sentra-node/rust/SentraBackend-GRPC-Services.proto /sentra-node/rust/
+
+RUN cargo build --release
+COPY ./sentra-node/rust/pebble.cer /etc/
+COPY ./benchmarking/sentra-node/enclave_run_script_sentra_node.sh /bin/enclave_run_script.sh
+COPY ./benchmarking/sentra-node/entrypoint-sentra-node.sh /entrypoint.sh
+RUN cp /sentra-node/rust/target/release/sentra_node /bin/sentra_node
+RUN ln -s /python-occlum/bin/python /bin/python3
+RUN sed -i 's/\r$//' /entrypoint.sh /bin/enclave_run_script.sh && chmod +x /entrypoint.sh /bin/enclave_run_script.sh
+WORKDIR /
+ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

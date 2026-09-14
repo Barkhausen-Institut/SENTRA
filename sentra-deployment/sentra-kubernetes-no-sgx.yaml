@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sentra
+  annotations:
+    description: "Namespace for Sentra"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentra-backend
+  namespace: sentra
+  labels:
+    app: sentra-backend
+spec:
+  selector:
+    app: sentra-backend
+    role: backend
+  ports:
+   - name: webgui
+     protocol: TCP
+     port: 8888
+   - name: grpc
+     protocol: TCP
+     port: 8000
+   - name: secure-grpc
+     protocol: TCP
+     port: 8001
+   - name: acme-service
+     protocol: TCP
+     port: 14000
+   - name: acme-management
+     protocol: TCP
+     port: 15000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sentra-ingress
+  namespace: sentra
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:  # No host specified
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sentra-backend
+            port:
+              number: 8888
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sentra-backend
+  namespace: sentra
+  labels:
+    app: sentra-backend
+    role: backend
+spec:
+  containers:
+  - name: sentra-backend
+    image: registry.tdp.trustworthy6g.net/tdp/sentra/sentra-backend:latest
+    imagePullPolicy: Always
+    args: ["--use-acme","--acme-host","127.0.0.1","--acme-server-certificate","/pebble/pebble.cer", "--training-config", "/etc/training_config.yaml","--fake-attestation"]
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node-role.kubernetes.io/control-plane
+            operator: Exists
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentra-nodes-service
+  namespace: sentra
+spec:
+  clusterIP: None
+  selector:
+    app: sentra-node
+  ports:
+  - name: inter-sentra-node-communication
+    protocol: TCP
+    port: 50051
+    targetPort: 50051
+---    
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sentra-node
+  namespace: sentra
+  labels:
+    app: sentra-node
+spec:
+  serviceName: sentra-nodes-service
+  replicas: 8
+  selector:
+    matchLabels:
+      app: sentra-node
+  template:
+    metadata:
+      name: sentra-node
+      namespace: sentra
+      labels:
+        app: sentra-node
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: sentra-node
+      containers:
+      - name: sentra-node
+        image: registry.tdp.trustworthy6g.net/tdp/sentra/sentra-no-sgx:latest
+        imagePullPolicy: Always
+        args: ["-no_sgx","--grpc-url", "https://sentra-backend:8001","--use-acme","--acme-url","https://sentra-backend:14000","--acme-cert","/etc/pebble.cer","--fake-attestation", "---", "/bin/sentra/run_mnist_batched_secure.py", "--train-config", "/etc/training_config.yaml"]
+        env:
+        - name: CONTAINER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['apps.kubernetes.io/pod-index']

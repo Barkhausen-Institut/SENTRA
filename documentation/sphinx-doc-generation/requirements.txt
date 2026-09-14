@@ -1,0 +1,5 @@
+sphinx
+sphinxcontrib-plantuml
+sphinx-rtd-theme
+sphinx-autoapi
+myst-parser

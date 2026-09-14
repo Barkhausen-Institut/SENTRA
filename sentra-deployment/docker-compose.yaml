@@ -1,0 +1,102 @@
+name: sentra
+
+x-sentra-mnist-training: &x-sentra-mnist-training
+    command: "/bin/sentra/run_mnist_batched_secure.py"
+    container_name: sentra-mnist-batched-secure
+
+x-sentra-base: &x-sentra-base
+    deploy:
+      mode: replicated-job
+      replicas: 1
+    ports:
+      - 3000:3000
+    depends_on:
+      - sentra-backend
+
+x-sentra-core-sgx: &x-sentra-core-sgx
+    <<: *x-sentra-base
+    build:
+      context: ../
+      dockerfile: ./benchmarking/sentra-node/Dockerfile.sentra-node-sgx
+    image: registry.tdp.trustworthy6g.net/tdp/sentra/sentra-sgx:latest
+    devices:
+      - "/dev/sgx_enclave:/dev/sgx_enclave"
+      - "/dev/sgx_provision:/dev/sgx_provision"
+    profiles:
+      - test
+
+x-sentra-core-no-sgx: &x-sentra-core-no-sgx
+    <<: *x-sentra-base
+    build:
+      context: ../
+      dockerfile: ./benchmarking/sentra-node/Dockerfile.sentra-node-nosgx
+    image: registry.tdp.trustworthy6g.net/tdp/sentra/sentra-no-sgx:latest
+
+x-sentra-multi-node: &x-sentra-multi-node
+  <<: *x-sentra-core-sgx
+  profiles:
+      - multi-node
+
+services:
+  sentra-simple-training:
+    <<: *x-sentra-core-sgx
+    command: ["--grpc-url", "https://sentra-backend:8001","--use-acme","--acme-url","https://sentra-backend:14000","--acme-cert","/etc/pebble.cer","---","/bin/sentra/run_training.py"]
+    container_name: sentra-test
+    profiles:
+      - test
+
+  sentra-simple-training-no-sgx:
+    <<: *x-sentra-core-no-sgx
+    command: ["--grpc-url", "https://sentra-backend:8001","--use-acme","--acme-url","https://sentra-backend:14000","--acme-cert","/etc/pebble.cer","---","/bin/sentra/run_training.py"]
+    container_name: sentra-test
+    profiles:
+      - test-no-sgx
+
+  sentra-mnist-training-sgx:
+    <<:
+      - *x-sentra-core-sgx
+      - *x-sentra-mnist-training
+    profiles:
+      - mnist_batched_secure
+
+  sentra-mnist-training-no-sgx:
+    <<:
+     - *x-sentra-core-no-sgx
+     - *x-sentra-mnist-training
+    profiles:
+      - mnist_batched_secure-no-sgx
+
+  sentra-node-1:
+    <<: *x-sentra-multi-node
+    command: /bin/sentra/run_mnist_batched_secure.py --config /bin/sentra/node_config.yaml --auto-close --node-id 1
+
+  sentra-node-2:
+    <<: *x-sentra-multi-node
+    command: /bin/sentra/run_mnist_batched_secure.py --config /bin/sentra/node_config.yaml --auto-close --node-id 2
+
+  sentra-node-3:
+    <<: *x-sentra-multi-node
+    command: /bin/sentra/run_mnist_batched_secure.py --config /bin/sentra/node_config.yaml --auto-close --node-id 3
+
+  sentra-node-4:
+    <<: *x-sentra-multi-node
+    command: /bin/sentra/run_mnist_batched_secure.py --config /bin/sentra/node_config.yaml --auto-close --node-id 4
+
+  sentra-node-5:
+    <<: *x-sentra-multi-node
+    command: /bin/sentra/run_mnist_batched_secure.py --config /bin/sentra/node_config.yaml --auto-close --node-id 5
+
+  sentra-backend:
+    image: registry.tdp.trustworthy6g.net/tdp/sentra/sentra-backend:latest
+    command: ["--use-acme","--acme-host","127.0.0.1","--acme-server-certificate","/pebble/pebble.cer"]
+    deploy:
+      mode: replicated-job
+      replicas: 1
+    container_name: sentra-backend
+    ports:
+      - 8888:8888
+    profiles:
+      - test
+      - test-no-sgx
+      - mnist_batched_secure
+      - mnist_batched_secure-no-sgx

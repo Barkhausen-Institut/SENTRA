@@ -1,0 +1,34 @@
+*.o
+*.a
+*.so
+*.orig
+*.log
+*.log.err
+build/
+target/
+.DS_Store
+src/libos/target/
+tools/toolchains/dcap_lib/target/
+dcap_c_test
+/ml_training/__pycache__/
+/documentation/sphinx-doc-generation/_build/
+
+# Optional local web demonstrator (not required for MPC training / benchmarks)
+/demonstrator/
+tmp_bench/
+**/__pycache__/
+/.vscode/
+logs/
+tmp-logs/
+.pytest_cache/
+benchmarking/sweep/
+sentra.git/
+*.egg-info/
+venv/
+.venv/
+benchmarking/crypten-benchmark/.venv/
+
+# Local-only experimental code (not used by SENTRA runtime/build)
+/old/
+
+/sentra-node/rust/Cargo.lock

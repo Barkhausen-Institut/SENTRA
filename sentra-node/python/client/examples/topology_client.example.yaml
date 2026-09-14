@@ -1,0 +1,16 @@
+# Example: client (dataset owner). Replace hosts with addresses reachable from the client pod/VM.
+role: client
+party_id: 0
+listen:
+  host: "0.0.0.0"
+  port: 9600
+training_nodes:
+  - id: 1
+    host: "training-node-1.example"
+    port: 9601
+  - id: 2
+    host: "training-node-2.example"
+    port: 9602
+  - id: 3
+    host: "training-node-3.example"
+    port: 9603

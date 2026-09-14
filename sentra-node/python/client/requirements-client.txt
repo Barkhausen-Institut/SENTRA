@@ -1,0 +1,4 @@
+# Dataset owner client only (install from sentra-node/python/client; needs ../node on PYTHONPATH for ml_training).
+numpy>=1.21
+tensorflow>=2.10
+PyYAML>=6.0

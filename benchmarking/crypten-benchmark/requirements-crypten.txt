@@ -1,0 +1,17 @@
+# CrypTen benchmark (Linux, Python 3.10 recommended).
+# crypten 0.4.1 declares deprecated PyPI package "sklearn" — use Makefile install
+# (sets SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL and installs scikit-learn first).
+
+# Pinned compatible stack (avoid torchvision 0.27 pulling torch 2.10+)
+torch==2.1.2
+torchvision==0.16.2
+numpy>=1.23.0,<2.0.0
+pyyaml>=6.0
+scipy>=1.6.0
+pandas>=1.2.2
+onnx>=1.7.0
+future>=0.18.0
+scikit-learn>=1.0.0
+
+# Installed separately in Makefile after deps (see install target)
+# crypten==0.4.1

@@ -1,0 +1,39 @@
+includes:
+  - base.yaml
+targets:
+  - target: /bin
+    createlinks:
+      - src: /opt/python-occlum/bin/python
+        linkname: python3
+  - target: /opt
+    copy:
+      - dirs:
+          - /python-occlum
+  - target: /
+    copy:
+      - dirs:
+          - /workspace
+      - files:
+        - /mnist.npz
+
+  - target: /workspace/node
+    mkdirs:
+      - logs
+  - target: /usr/local/bin
+    copy:
+     - files:
+        - /usr/local/bin/run_benchmark_from_config.py
+  - target: /bin
+    copy:
+     - files:
+        - /bin/enclave_run_script.sh
+        - /opt/occlum/toolchains/bash/glibc/bash
+        - /opt/occlum/toolchains/busybox/glibc/busybox
+  - target: /root/.keras/datasets
+    copy:
+     - files:
+        - /mnist.npz
+  - target: /etc/ssl
+    copy:
+     - dirs:
+        - /etc/ssl/certs

@@ -1,0 +1,33 @@
+includes:
+  - base.yaml
+targets:
+  - target: /bin
+    createlinks:
+      - src: /opt/python-occlum/bin/python
+        linkname: python3
+  - target: /opt
+    copy:
+      - dirs:
+          - /python-occlum
+  - target: /bin
+    copy:
+      - dirs:
+          - /sentra
+
+  - target: /bin
+    copy:
+     - files:
+        - /sentra-node/rust/target/release/sentra_node
+        - /enclave_run_script.sh
+
+  - target: /bin
+    copy:
+     - files:
+        - /opt/occlum/toolchains/bash/glibc/bash
+        - /opt/occlum/toolchains/busybox/glibc/busybox
+
+  - target: /etc
+    copy:
+     - files:
+        - /sentra-node/rust/pebble.cer
+        - /sentra/training_config.yaml

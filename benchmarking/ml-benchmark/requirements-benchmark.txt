@@ -1,0 +1,5 @@
+# Pinned Python stack for ML benchmark image (pip on conda Python).
+tensorflow==2.15.1
+numpy==1.26.4
+PyYAML==6.0.1
+openpyxl==3.1.2

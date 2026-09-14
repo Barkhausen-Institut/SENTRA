@@ -1,0 +1,13 @@
+# Aligned with benchmarking/ml-benchmark/configs/with-client.yaml (MPC hyperparameters).
+# CrypTen uses world_size parties (no separate client process; data held at rank 0).
+
+world-size: 4
+indices-dir: ../ml-benchmark/assets
+mnist-samples: 512
+batch-size: 32
+num-epochs: 2
+learning-rate: 0.01
+seed: 2026
+client-eval-samples: 64
+client-test-samples: 64
+# mnist-npz: /path/to/mnist.npz  # optional; defaults to benchmarking/shared/mnist.npz

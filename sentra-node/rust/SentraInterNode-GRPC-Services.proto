@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package sentra_inter_node_grpc_services;
+
+service InterNodeMessageService {
+rpc InterNodeStream (stream InterNodeMessage) returns (stream InterNodeMessage);
+}
+
+message HelloMessage
+{
+    string node_id=1;
+}
+
+message HeartbeatMessage
+{
+    string message=1;
+}
+
+message InterNodeMessage 
+{
+    oneof message_type {
+        HelloMessage hello=1;
+        HeartbeatMessage heartbeat=2;
+    }
+}

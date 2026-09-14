@@ -1,0 +1,31 @@
+# Medium benchmark (longer wall time).
+
+headless: true
+host: "127.0.0.1"
+n-nodes: 4
+t: 1
+base-port: 9200
+batch-size: 64
+accum-steps: 1
+num-epochs: 3
+mnist-samples: 2048
+learning-rate: 0.003
+seed: 2026
+loss-mode: softmax
+scale-factor: 65536
+field-size: 2305843009213693951
+softmax-temperature: 2.0
+grad-clip: 0.5
+logit-clip: 4.0
+exp-approx: pade22
+softmax-grad-mode: secure_approx
+explode-logit-threshold: 100.0
+loss-growth-threshold: 5.0
+grad-norm-threshold: 1500.0
+debug-numerics: true
+no-abort-on-instability: true
+membership-epoch: 0
+distribute-dataset-shares: true
+dataset-owner-node: 1
+dataset-distribution-timeout: 600.0
+record-results-xlsx: logs/docker_benchmark_runs.xlsx

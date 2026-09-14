@@ -1,0 +1,56 @@
+# Build context = repository root (../.. from this file).
+services:
+  ml-benchmark:
+    build:
+      context: ../..
+      dockerfile: benchmarking/ml-benchmark/Dockerfile.ml-benchmark
+    image: sentra-ml-benchmark:latest
+    environment:
+      TF_CPP_MIN_LOG_LEVEL: "2"
+      MNIST_NPZ_PATH: "/mnist.npz"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      # Serialize PSS unpack before training; rebroadcast barrier SYNC under load.
+      SENTRA_PREWARM_TRAIN_UNPACK: "1"
+      SENTRA_BARRIER_RESEND_S: "2"
+      SENTRA_STRICT_UNPACK_BARRIER: "1"
+      SENTRA_FORCE_U64_VECTORS: "1"
+      SENTRA_SOCKET_RECV_TIMEOUT: "300"
+      # Set to 1 to barrier after each train batch (slow; isolates MPC desync during training).
+      SENTRA_STRICT_TRAIN_BARRIER: "0"
+      SENTRA_RUNTIME_METRICS: "1"
+      SENTRA_RESOURCE_SAMPLE_INTERVAL_S: "30"
+    volumes:
+      - ml_benchmark_logs:/workspace/node/logs
+
+  ml-benchmark-sgx:
+    build:
+      context: ../..
+      dockerfile: benchmarking/ml-benchmark/Dockerfile.ml-benchmark.sgx
+    image: sentra-ml-benchmark-sgx:latest
+    environment:
+      TF_CPP_MIN_LOG_LEVEL: "2"
+      MNIST_NPZ_PATH: "/mnist.npz"
+      SENTRA_BEAVER_POOL_SIZE: "8000"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      SENTRA_PREWARM_TRAIN_UNPACK: "1"
+      SENTRA_BARRIER_RESEND_S: "2"
+      SENTRA_STRICT_UNPACK_BARRIER: "1"
+      SENTRA_FORCE_U64_VECTORS: "1"
+      SENTRA_SOCKET_RECV_TIMEOUT: "300"
+      SENTRA_STRICT_TRAIN_BARRIER: "0"
+      SENTRA_RUNTIME_METRICS: "1"
+      SENTRA_RESOURCE_SAMPLE_INTERVAL_S: "30"
+    devices:
+      - "/dev/sgx_enclave:/dev/sgx_enclave"
+      - "/dev/sgx_provision:/dev/sgx_provision"
+    volumes:
+      - ml_benchmark_logs:/workspace/node/logs
+
+volumes:
+  ml_benchmark_logs:

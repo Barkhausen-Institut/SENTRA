@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package sentra_backend_grpc_services;
+
+service NodeMessageService {
+rpc NodeStream (stream NodeMessage) returns (stream ServerMessage);
+}
+
+service TCPProxyService {
+    rpc Stream(stream NodeMessage) returns (stream ServerMessage);
+}
+
+message RegisterRequest {
+    string node_id = 1;
+    string node_grpc_url=2;
+}
+
+message RegisterResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message AttestationRequest {
+    string nonce = 1;
+}
+
+message AttestationResponse {
+    bytes report = 1;
+}
+
+message t_grpc_SentraNode {
+    string node_id = 1;        // Unique identifier for the node
+    string grpc_url = 2;     // URL of GRPC interface for inter node communication
+}
+
+message JoinCommitteeRequest {
+    repeated t_grpc_SentraNode committee =1;
+}
+
+message CommitteeJoinACK {
+    enum Status {
+        SUCCESS = 0;
+        UNKNOWN = -1;
+        NO_CONNECTION = -2;
+        ATTESTATION_FAILED =-3;
+    }
+
+    string node_id = 1;        // Unique identifier for the node
+    Status status = 2;     // Status regarding the join operation
+}
+
+message JoinCommitteeResponse {
+    bytes report = 1;
+}
+
+message PythonMsg {
+    bytes msg=1;
+}
+
+message PythonControlMsg
+{
+    enum StreamState
+    {
+        OPEN=0; // signals a new stream
+        CLOSE=1; // closes an existing stream
+    }
+
+    StreamState stream_control_flag=1;
+}
+
+// Message from node to server (client -> server)
+message NodeMessage {
+    oneof message_type {
+        RegisterRequest register = 1;
+        AttestationResponse quote=2;
+        JoinCommitteeResponse join_committee_response=3;
+        PythonMsg python_msg=4;
+    }
+}
+
+// Message from server to node (server -> client)
+message ServerMessage {
+    oneof message_type {
+        RegisterResponse response = 1;
+        AttestationRequest attestation=2;
+        JoinCommitteeRequest join_committee_request=3;
+        PythonMsg python_msg=4;
+    }
+}

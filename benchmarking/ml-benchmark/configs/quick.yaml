@@ -1,0 +1,29 @@
+# Fast smoke benchmark (reviewers / CI). All parties in one container (127.0.0.1).
+
+headless: true
+host: "127.0.0.1"
+n-nodes: 3
+t: 1
+base-port: 9100
+batch-size: 32
+accum-steps: 1
+num-epochs: 1
+mnist-samples: 256
+learning-rate: 0.01
+seed: 2026
+loss-mode: softmax
+scale-factor: 1048576
+field-size: 4294967291
+softmax-temperature: 1.0
+grad-clip: 2.0
+logit-clip: 8.0
+exp-approx: pade22
+softmax-grad-mode: secure_approx
+explode-logit-threshold: 10.0
+loss-growth-threshold: 5.0
+grad-norm-threshold: 5.0
+no-abort-on-instability: true
+membership-epoch: 0
+distribute-dataset-shares: true
+dataset-owner-node: 1
+dataset-distribution-timeout: 120.0

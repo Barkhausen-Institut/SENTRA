@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[project]
+name = "ml_training"
+version = "0.1.0"
+description = "ML Training in SENTRA"
+requires-python = ">=3.10"
+
+dependencies = [
+    "tensorflow>=2.10",
+    "numpy>=1.21",
+    "pytest>=7.0",
+    "openpyxl>=3.0",
+    "psutil>=5.9"
+]

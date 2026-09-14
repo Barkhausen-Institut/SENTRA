@@ -1,0 +1,20 @@
+# Example: training party 2. Each node gets its own file; party_id and listen must match this process.
+role: node
+party_id: 2
+listen:
+  host: "0.0.0.0"
+  port: 9602
+training_nodes:
+  - id: 1
+    host: "training-node-1.example"
+    port: 9601
+  - id: 2
+    host: "training-node-2.example"
+    port: 9602
+  - id: 3
+    host: "training-node-3.example"
+    port: 9603
+client:
+  party_id: 0
+  host: "sentra-client.example"
+  port: 9600

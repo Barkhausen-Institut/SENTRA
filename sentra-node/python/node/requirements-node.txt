@@ -1,0 +1,2 @@
+# Training node: full stack (same as requirements.txt).
+-r requirements.txt
