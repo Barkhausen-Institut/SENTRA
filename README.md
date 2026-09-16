@@ -6,7 +6,9 @@ Train a model without any single compute node holding the full dataset in the cl
 
 ## Paper
 
-For the full system design, security model, and evaluation, see: **SENTRA: Privacy-Preserving Training in Outsourced Cloud Environments** [https://eprint.iacr.org/2026/1443](https://eprint.iacr.org/2026/1443)
+For the full system design, security model, and evaluation, see:
+
+**[SENTRA: Privacy-Preserving Training in Outsourced Cloud Environments](https://eprint.iacr.org/2026/1443)**
 
 ---
 
