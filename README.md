@@ -3,6 +3,11 @@
 **Secure, distributed machine learning** over secret-shared data using multi-party computation (MPC), Intel SGX enclaves, and client-side secret sharing.
 
 Train a model without any single compute node holding the full dataset in the clear. A **client** secret-shares MNIST features and labels across **compute nodes**; the nodes collaboratively perform secure forward/backward passes using Beaver triples, secure comparison (ReLU), and fixed-point softmax approximations.
+
+## Paper
+
+For the full system design, security model, and evaluation, see: **SENTRA: Privacy-Preserving Training in Outsourced Cloud Environments** [https://eprint.iacr.org/2026/1443](https://eprint.iacr.org/2026/1443)
+
 ---
 
 ## Features
